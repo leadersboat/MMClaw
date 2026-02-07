@@ -10,7 +10,7 @@ class ShellTool(object):
                 command, 
                 shell=True, 
                 capture_output=True, 
-                text=True, 
+                encoding='utf-8', 
                 timeout=30
             )
             output = result.stdout if result.returncode == 0 else result.stderr

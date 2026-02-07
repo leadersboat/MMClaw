@@ -79,7 +79,7 @@ class WhatsAppConnector(object):
         """Prepare environment to find global node_modules."""
         env = os.environ.copy()
         try:
-            npm_root = subprocess.check_output(["npm", "root", "-g"], text=True, stderr=subprocess.DEVNULL, shell=self.is_windows).strip()
+            npm_root = subprocess.check_output(["npm", "root", "-g"], encoding='utf-8', stderr=subprocess.DEVNULL, shell=self.is_windows).strip()
             existing_path = env.get("NODE_PATH", "")
             env["NODE_PATH"] = f"{npm_root}{os.pathsep}{existing_path}" if existing_path else npm_root
         except:
@@ -114,7 +114,7 @@ class WhatsAppConnector(object):
         self.process = subprocess.Popen(
             ["node", self.bridge_path],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None,
-            env=env, text=True, bufsize=1, shell=self.is_windows
+            env=env, encoding='utf-8', bufsize=1, shell=self.is_windows
         )
 
         def output_reader():
