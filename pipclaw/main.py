@@ -144,9 +144,11 @@ def main():
 
     parser = argparse.ArgumentParser(description="PipClaw: Your autonomous AI agent.")
     parser.add_argument("command", nargs="?", help="Command to run (run, config)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug output (show raw LLM and Tool data)")
     args = parser.parse_args()
 
     config = ConfigManager.load()
+    config["debug"] = args.debug  # Store debug state in config dict for easy passing
     
     if args.command == "config":
         config = run_setup(config)
@@ -173,7 +175,7 @@ def main():
         print(f"\n[❌] API Key missing. Please run 'pipclaw config' or edit {ConfigManager.CONFIG_FILE}")
         return
     
-    app = PipClaw(config, connector, system_prompt=ConfigManager.get_full_prompt())
+    app = PipClaw(config, connector, system_prompt=ConfigManager.get_full_prompt(mode=mode))
     app.run()
 
 if __name__ == "__main__":

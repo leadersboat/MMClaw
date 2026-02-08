@@ -3,7 +3,7 @@ import queue
 import json
 import re
 from .providers import Engine
-from .tools import ShellTool, FileTool
+from .tools import ShellTool, FileTool, TimerTool
 
 class Memory(object):
     def __init__(self, system_prompt):
@@ -17,6 +17,7 @@ class PipClaw(object):
         self.connector = connector
         self.memory = Memory(system_prompt)
         self.task_queue = queue.Queue()
+        self.debug = config.get("debug", False)
         
         self.worker_thread = threading.Thread(target=self._worker, daemon=True)
         self.worker_thread.start()
@@ -67,6 +68,11 @@ class PipClaw(object):
                     name = tool.get("name")
                     args = tool.get("args", {})
                     
+                    # Always print the tool name
+                    print(f"    [Tool Call: {name}]")
+                    if self.debug:
+                        print(f"    Args: {json.dumps(args)}")
+
                     result = ""
                     if name == "shell_execute":
                         self.connector.send(f"🐚 Shell: `{args.get('command')}`")
@@ -81,7 +87,12 @@ class PipClaw(object):
                         self.connector.send(f"📤 Upload: `{args.get('path')}`")
                         self.connector.send_file(args.get("path"))
                         result = f"File {args.get('path')} sent."
+                    elif name == "wait":
+                        self.connector.send(f"⏳ Waiting {args.get('seconds')}s...")
+                        result = TimerTool.wait(args.get("seconds"))
                     
+                    if self.debug:
+                        print(f"\n    [Tool Output: {name}]\n    {result}\n")
                     self.memory.add("system", f"Tool Output ({name}):\n{result}")
 
             self.task_queue.task_done()

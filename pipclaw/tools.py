@@ -38,3 +38,15 @@ class FileTool(object):
             return f"Successfully wrote to {path}"
         except Exception as e:
             return f"Error writing file: {str(e)}"
+
+class TimerTool(object):
+    @staticmethod
+    def wait(seconds):
+        """Pauses execution for a specified number of seconds (cross-platform)."""
+        import time
+        try:
+            secs = float(seconds)
+            time.sleep(secs)
+            return f"Waited for {secs} seconds."
+        except Exception as e:
+            return f"Timer error: {str(e)}"

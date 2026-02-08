@@ -7,6 +7,7 @@ class Engine(object):
         self.api_key = config["api_key"]
         self.base_url = config["base_url"].rstrip('/')
         self.model = config["model"]
+        self.debug = config.get("debug", False)
 
     def ask(self, messages, tools=None):
         payload = {
@@ -31,7 +32,10 @@ class Engine(object):
         try:
             with urllib.request.urlopen(req, timeout=60) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
-                return res_data["choices"][0]["message"]
+                msg = res_data["choices"][0]["message"]
+                if self.debug:
+                    print(f"\n[LLM Response]\n{json.dumps(msg, indent=2)}\n")
+                return msg
         except Exception as e:
             # For a tutorial, we return a simple error message in message format
             return {"role": "assistant", "content": f"Engine Error: {e}"}

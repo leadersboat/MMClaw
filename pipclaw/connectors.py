@@ -174,4 +174,9 @@ class WhatsAppConnector(object):
         self.process.stdin.flush()
 
     def send_file(self, path):
-        self.send(f"📦 [File]: {os.path.abspath(os.path.expanduser(path))}")
+        if not self.process or not (self.active_recipient or self.authorized_id): return
+        recipient = self.active_recipient or self.authorized_id
+        full_path = os.path.abspath(os.path.expanduser(path))
+        payload = {"to": recipient, "path": full_path}
+        self.process.stdin.write(f"SEND_FILE:{json.dumps(payload)}\n")
+        self.process.stdin.flush()

@@ -58,7 +58,8 @@ class ConfigManager(object):
         "- shell_execute(command)\n"
         "- file_read(path)\n"
         "- file_write(path, content)\n"
-        "- file_upload(path)"
+        "- file_upload(path)\n"
+        "- wait(seconds)"
     )
 
     DEFAULT_CONFIG = {
@@ -87,7 +88,25 @@ class ConfigManager(object):
         print(f"[*] Config saved to {cls.CONFIG_FILE}")
 
     @classmethod
-    def get_full_prompt(cls):
-        """Combine base prompt with synchronized skills."""
+    def get_full_prompt(cls, mode="terminal"):
+        """Combine base prompt with synchronized skills and interface context."""
         SkillManager.sync_skills()
-        return cls.BASE_SYSTEM_PROMPT + SkillManager.get_skills_prompt()
+        
+        interface_context = f"\n\n[INTERFACE CONTEXT]\nYou are currently responding via: {mode.upper()}\n"
+        if mode == "telegram":
+            interface_context += (
+                "Formatting Guidelines: Use standard Markdown. You can use bold, italics, and code blocks. "
+                "Telegram supports rich media, so feel free to be expressive.\n"
+            )
+        elif mode == "whatsapp":
+            interface_context += (
+                "Formatting Guidelines: Use WhatsApp-specific formatting: *bold*, _italic_, ~strikethrough~, "
+                "and ```monospace```. Keep messages relatively concise as they are read on mobile.\n"
+            )
+        else:
+            interface_context += (
+                "Formatting Guidelines: Use plain text for the terminal. Use simple ASCII characters "
+                "for lists (e.g., - or *) and tables. Avoid complex markdown that doesn't render in a shell.\n"
+            )
+
+        return cls.BASE_SYSTEM_PROMPT + interface_context + SkillManager.get_skills_prompt()

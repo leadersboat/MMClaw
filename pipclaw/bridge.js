@@ -77,6 +77,40 @@ async function startBot() {
             if (line.startsWith("SEND:")) {
                 const payload = JSON.parse(line.substring(5));
                 await sock.sendMessage(payload.to, { text: payload.text });
+            } else if (line.startsWith("SEND_FILE:")) {
+                const payload = JSON.parse(line.substring(10));
+                const filePath = payload.path;
+                console.log(`    [*] Bridge: Attempting to send file: ${filePath}`);
+                if (fs.existsSync(filePath)) {
+                    const fileName = path.basename(filePath);
+                    const ext = path.extname(filePath).toLowerCase();
+                    
+                    const mimeMap = {
+                        '.csv': 'text/csv',
+                        '.txt': 'text/plain',
+                        '.pdf': 'application/pdf',
+                        '.png': 'image/png',
+                        '.jpg': 'image/jpeg',
+                        '.jpeg': 'image/jpeg',
+                        '.mp4': 'video/mp4',
+                        '.zip': 'application/zip'
+                    };
+                    
+                    const mimetype = mimeMap[ext] || 'application/octet-stream';
+
+                    try {
+                        await sock.sendMessage(payload.to, { 
+                            document: { url: filePath }, 
+                            fileName: fileName,
+                            mimetype: mimetype
+                        });
+                        console.log(`    [✓] Bridge: File sent successfully: ${fileName}`);
+                    } catch (err) {
+                        console.log(`    [!] Bridge: Error sending file: ${err.message}`);
+                    }
+                } else {
+                    console.log(`    [!] Bridge: File not found: ${filePath}`);
+                }
             }
         } catch (e) {
             // Error handling
