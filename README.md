@@ -4,6 +4,8 @@ The Ultra-Lightweight, Pure Python Kernel for AI Agents.
 
 **Home:** [https://github.com/CrawlScript/pipclaw](https://github.com/CrawlScript/pipclaw)
 
+**English** | [中文说明](README_zh.md)
+
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
@@ -41,6 +43,7 @@ PipClaw allows you to interact with your agent through multiple channels:
 
 - **Terminal Mode**: Standard interactive CLI (default).
 - **Telegram Mode**: No external dependencies. Just create a bot via [@BotFather](https://t.me/botfather) and provide your token during setup.
+- **Feishu (飞书) Mode**: Dedicated support for Chinese users. Features the **most detailed step-by-step setup guide** in the industry, utilizing long-connections so you don't need a public IP or complex webhooks.
 - **WhatsApp Mode**: Requires **Node.js** (v22.17.0 recommended) to run the lightweight bridge. The agent will show a QR code in your terminal for linking.
 
 ```bash

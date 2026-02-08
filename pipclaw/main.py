@@ -142,7 +142,8 @@ def run_setup(existing_config=None):
         input("    完成后请按回车键继续...")
         print("[*] 第七步：左侧菜单选择“版本管理与发布”，点击“创建版本”，输入相关信息，保存后确认发布。")
         input("    完成后请按回车键继续...")
-        print("\n[✓] 飞书配置完成！在飞书APP中搜索刚才创建的应用名，和它聊天即可。")
+
+        print("\n[✓] 飞书配置完成！运行 pipclaw 后，在飞书 APP 中搜索刚才创建的应用名，并发送终端显示的 6 位验证码即可完成身份绑定。")
     elif choice == "2":
         config["preferred_mode"] = "telegram"
         print("\n--- 🛠 Telegram Setup ---")

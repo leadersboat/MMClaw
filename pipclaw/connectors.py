@@ -83,8 +83,8 @@ class FeishuConnector(object):
         print(f"\n--- PipClaw Kernel Active (Feishu Mode) ---")
         
         if not self.authorized_id:
-            print(f"[🔐] FEISHU VERIFICATION REQUIRED")
-            print(f"[*] PLEASE SEND THIS CODE TO THE BOT ON FEISHU: {self.verify_code}")
+            print(f"[🔐] 需要进行飞书身份验证")
+            print(f"[*] 请将以下 6 位验证码发送给飞书机器人: {self.verify_code}")
 
         event_handler = lark.EventDispatcherHandler.builder("", "") \
             .register_p2_im_message_receive_v1(self._handle_message) \
