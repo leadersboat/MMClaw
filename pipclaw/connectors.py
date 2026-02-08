@@ -116,7 +116,51 @@ class FeishuConnector(object):
             print(f"[!] Feishu Reply Error: {response.code}, {response.msg}")
 
     def send_file(self, path):
-        self.send(f"📄 [File] {path}")
+        if not self.last_message_id: 
+            return
+        
+        full_path = os.path.expanduser(path)
+        if not os.path.exists(full_path):
+            self.send(f"❌ File not found: {path}")
+            return
+
+        file_name = os.path.basename(full_path)
+        
+        try:
+            # 1. Upload file
+            with open(full_path, "rb") as f:
+                request = CreateFileRequest.builder() \
+                    .request_body(CreateFileRequestBody.builder() \
+                        .file_type("stream") \
+                        .file_name(file_name) \
+                        .file(f) \
+                        .build()) \
+                    .build()
+                response: CreateFileResponse = self.client.im.v1.file.create(request)
+                
+            if not response.success():
+                print(f"[!] Feishu Upload Error: {response.code}, {response.msg}")
+                self.send(f"❌ Error uploading file: {response.msg}")
+                return
+                
+            file_key = response.data.file_key
+            
+            # 2. Send file message (as a reply)
+            reply_body = json.dumps({"file_key": file_key})
+            request = ReplyMessageRequest.builder() \
+                .message_id(self.last_message_id) \
+                .request_body(ReplyMessageRequestBody.builder() \
+                    .content(reply_body) \
+                    .msg_type("file") \
+                    .build()) \
+                .build()
+                
+            response: ReplyMessageResponse = self.client.im.v1.message.reply(request)
+            if not response.success():
+                print(f"[!] Feishu Send File Error: {response.code}, {response.msg}")
+        except Exception as e:
+            print(f"[!] Feishu File Process Error: {e}")
+            self.send(f"❌ Error processing file: {str(e)}")
 
 class TelegramConnector(object):
     def __init__(self, token, telegram_authorized_user_id):
