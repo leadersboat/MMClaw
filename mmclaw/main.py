@@ -131,7 +131,7 @@ def run_setup(existing_config=None):
         config["feishu_app_secret"] = ask("App Secret", "feishu_app_secret", "")
         print("[*] 第四步：左侧菜单栏选择“权限管理”，点击“批量导入/导出权限”，复制并粘贴以下 JSON：")
         print("\n{\n  \"scopes\": {\n    \"tenant\": [\n      \"contact:user.base:readonly\",\n      \"im:chat\",\n      \"im:chat:read\",\n      \"im:chat:update\",\n      \"im:message\",\n      \"im:message.group_at_msg:readonly\",\n      \"im:message.p2p_msg:readonly\",\n      \"im:message:send_as_bot\",\n      \"im:resource\"\n    ],\n    \"user\": []\n  }\n}\n")
-        print("    然后点击“下一步”，点击“确认新增权限”，然后点击“申请开通”，最后点击“确认”。")
+        print("    点击“下一步，确认新增权限”，然后点击“申请开通”，最后点击“确认”。")
         input("    完成后请按回车键继续...")
         print("\n[*] 第五步：在飞书平台左侧菜单选择“事件与回调”。")
         print("    为了能够开启“长连接”，请在另一个终端运行以下命令（已自动填充您的 ID 和 Secret）：")
