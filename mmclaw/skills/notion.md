@@ -112,26 +112,24 @@ FOUND_ID=$(echo "$SEARCH_RESULT" | python3 -c "
 import json, sys
 target = '$DB_NAME'.lower()
 results = json.load(sys.stdin).get('results', [])
-for r in results:
-    title = r.get('title', [])
-    name = title[0]['plain_text'] if title else ''
-    if name.lower() == target:
-        print(r['id'])
-        break
+match = next((r['id'] for r in results if (r.get('title') or [{}])[0].get('plain_text','').lower() == target), '')
+print(match)
 ")
 ```
 
 3. If `FOUND_ID` is not empty → save the name to config:
 
 ```bash
-python3 -c "
+python3 << 'EOF'
 import json, os
-path = os.path.expanduser('~/.mmclaw/skill-config/notion.json')
-config = json.load(open(path, encoding='utf-8'))
-config.setdefault('defaults', {})['database_name'] = '$DB_NAME'
-json.dump(config, open(path, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)
-print('Saved database_name: $DB_NAME')
-"
+path = os.path.expanduser("~/.mmclaw/skill-config/notion.json")
+with open(path, encoding="utf-8") as f:
+    config = json.load(f)
+config.setdefault("defaults", {})["database_name"] = "$DB_NAME"
+with open(path, "w", encoding="utf-8") as f:
+    json.dump(config, f, indent=2, ensure_ascii=False)
+print("Saved database_name:", config["defaults"]["database_name"])
+EOF
 ```
 
 4. If search returns empty → stop and return:
@@ -155,7 +153,9 @@ DEFAULT_DB_NAME=$(python3 -c "import json; print(json.load(open('$HOME/.mmclaw/s
 
 ## Discovery: Getting the data_source_id
 
-Before querying or writing to a database, resolve the name to a `data_source_id`:
+Before querying or writing to a database, resolve the name to a `data_source_id`.
+
+**IMPORTANT: Always use an empty query (`{}` body with only filter) to list ALL databases, then match by name in Python. Never pass the database name as `query` parameter — Notion's search is fuzzy and unreliable for exact matching.**
 
 ```bash
 # List ALL accessible data sources (empty query = return all)
@@ -165,19 +165,24 @@ SEARCH_RESULT=$(curl -s -X POST "https://api.notion.com/v1/search" \
   -H "Content-Type: application/json" \
   -d '{"filter": {"value": "data_source", "property": "object"}}')
 
-# Match by name (case-insensitive)
+# Match by name (case-insensitive) — note: no quotes around EOF so $DEFAULT_DB_NAME expands
 DATA_SOURCE_ID=$(echo "$SEARCH_RESULT" | python3 -c "
 import json, sys
 target = '$DEFAULT_DB_NAME'.lower()
 results = json.load(sys.stdin).get('results', [])
-for r in results:
-    title = r.get('title', [])
-    name = title[0]['plain_text'] if title else ''
-    if name.lower() == target:
-        print(r['id'])
-        break
+match = next((r['id'] for r in results if (r.get('title') or [{}])[0].get('plain_text','').lower() == target), '')
+print(match)
 ")
 ```
+
+> If `DATA_SOURCE_ID` is still empty after the above, print all available names for debugging:
+> ```bash
+> echo "$SEARCH_RESULT" | python3 -c "
+> import json, sys
+> for r in json.load(sys.stdin).get('results', []):
+>     print(r.get('title', [{}])[0].get('plain_text','(untitled)'), '->', r['id'])
+> "
+> ```
 
 If `DATA_SOURCE_ID` is empty → the database is not accessible. See the permissions guidance in the Default Parent Behavior section.
 
