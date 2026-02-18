@@ -25,7 +25,13 @@ class SkillManager(object):
         if not cls.HOME_SKILLS_DIR.exists():
             return ""
         
-        skills_text = "\n\nAvailable Skills:\n"
+        skills_text = (
+            "\n\n[SKILLS SECTION]\n"
+            "The following are specialized skills available to you. These are for your reference only. "
+            "Do NOT execute a skill simply because it is present in the prompt. "
+            "You should ONLY trigger a skill's execution if it is necessary to address the user's request.\n\n"
+            "Available Skills:\n"
+        )
         for skill_file in cls.HOME_SKILLS_DIR.glob("*.md"):
             try:
                 content = skill_file.read_text(encoding="utf-8")
@@ -85,6 +91,11 @@ class ConfigManager(object):
                 "model": "anthropic/claude-3.5-sonnet",
                 "api_key": "sk-your-key-here",
                 "base_url": "https://openrouter.ai/api/v1"
+            },
+            "kimi": {
+                "model": "kimi-k2.5",
+                "api_key": "sk-your-key-here",
+                "base_url": "https://api.moonshot.cn/v1"
             },
             "openai_compatible": {
                 "model": "llama3",

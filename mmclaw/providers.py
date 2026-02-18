@@ -58,7 +58,7 @@ class Engine(object):
         self.debug = config.get("debug", False)
 
     def ask(self, messages, tools=None):
-        if self.engine_type in ["openai", "google", "deepseek", "openrouter", "openai_compatible"]:
+        if self.engine_type in ["openai", "google", "deepseek", "openrouter", "kimi", "openai_compatible"]:
             payload = {
                 "model": self.model, 
                 "messages": messages, 
