@@ -79,52 +79,52 @@ class ConfigManager(object):
         "engines": {
             "openai": {
                 "model": "gpt-4o",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "https://api.openai.com/v1"
             },
             "codex": {
                 "model": "gpt-4o",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "https://api.openai.com/v1"
             },
             "deepseek": {
                 "model": "deepseek-chat",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "https://api.deepseek.com"
             },
             "openrouter": {
                 "model": "anthropic/claude-3.5-sonnet",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "https://openrouter.ai/api/v1"
             },
             "kimi": {
                 "model": "kimi-k2.5",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "https://api.moonshot.cn/v1"
             },
             "openai_compatible": {
                 "model": "llama3",
-                "api_key": "sk-your-key-here",
+                "api_key": None,
                 "base_url": "http://localhost:11434/v1"
             },
             "google": {
                 "model": "gemini-1.5-pro",
-                "api_key": "your-key-here",
+                "api_key": None,
                 "base_url": "https://generativelanguage.googleapis.com/v1beta/openai"
             }
         },
         "connector_type": "terminal",
         "connectors": {
             "telegram": {
-                "token": "",
+                "token": None,
                 "authorized_user_id": 0
             },
             "whatsapp": {
                 "authorized_id": None
             },
             "feishu": {
-                "app_id": "",
-                "app_secret": "",
+                "app_id": None,
+                "app_secret": None,
                 "authorized_id": None
             }
         }

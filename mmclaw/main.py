@@ -163,12 +163,12 @@ def run_setup(existing_config=None):
             else:
                 config["engines"][engine_id]["base_url"] = ask("Enter Base URL", "base_url", "http://localhost:11434/v1", nested_engine=engine_id)
 
-            config["engines"][engine_id]["api_key"] = ask(f"Enter {provider['name']} API Key", "api_key", "sk-xxx", nested_engine=engine_id)
+            config["engines"][engine_id]["api_key"] = ask(f"Enter {provider['name']} API Key", "api_key", None, nested_engine=engine_id)
 
         # Dynamic Model Fetching
         engine_config = config["engines"][engine_id]
         models = provider["models"]
-        if engine_id != "codex" and engine_config["api_key"] and engine_config["api_key"] != "sk-xxx":
+        if engine_id != "codex" and engine_config.get("api_key"):
             print(f"[*] Fetching live models from {provider['name']}...")
             try:
                 req = urllib.request.Request(
@@ -218,12 +218,12 @@ def run_setup(existing_config=None):
 
         if choice == "4":
             config["connector_type"] = "feishu"
-            config["connectors"]["feishu"]["app_id"] = ask("App ID", "app_id", "", nested_connector="feishu")
-            config["connectors"]["feishu"]["app_secret"] = ask("App Secret", "app_secret", "", nested_connector="feishu")
+            config["connectors"]["feishu"]["app_id"] = ask("App ID", "app_id", None, nested_connector="feishu")
+            config["connectors"]["feishu"]["app_secret"] = ask("App Secret", "app_secret", None, nested_connector="feishu")
             if not config["connectors"]["feishu"].get("authorized_id"): need_auth = True
         elif choice == "2":
             config["connector_type"] = "telegram"
-            config["connectors"]["telegram"]["token"] = ask("Bot API Token", "token", "", nested_connector="telegram")
+            config["connectors"]["telegram"]["token"] = ask("Bot API Token", "token", None, nested_connector="telegram")
             user_id = ask("Your User ID", "authorized_user_id", "0", nested_connector="telegram")
             config["connectors"]["telegram"]["authorized_user_id"] = int(user_id) if str(user_id).isdigit() else 0
         elif choice == "3":
@@ -271,7 +271,7 @@ def main():
 
     engine_type = config.get("engine_type", "openai")
     active_engine = config.get("engines", {}).get(engine_type, {})
-    if not active_engine.get("api_key") or "your-key-here" in active_engine.get("api_key", ""):
+    if not active_engine.get("api_key"):
         print(f"\n[❌] API Key missing for {engine_type}. Run 'mmclaw config'.")
         return
     
