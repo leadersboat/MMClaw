@@ -51,7 +51,17 @@ MMClaw 允许您通过多个渠道与您的 Agent 交互：
 mmclaw config
 ```
 
-## 📂 项目结构
+## 🧠 模型引擎 (Engines)
+
+MMClaw 支持多种主流 LLM 引擎：
+
+- **OpenAI**: 支持 GPT-4o, o1 等全系列模型。
+- **OpenAI Codex**: 深度集成，通过 **OAuth 设备码认证** 登录（无需手动管理 API Key）。
+- **Google Gemini**: 支持 Gemini 1.5 Pro/Flash, 2.0 Flash。
+- **DeepSeek**: 支持 DeepSeek-V3, DeepSeek-R1。
+- **Kimi (Moonshot AI)**: 原生支持 Kimi k2.5。
+- **OpenAI-Compatible**: 支持自定义 Base URL，可连接本地或第三方引擎（如 Ollama, LocalAI 等）。
+- **其他**: 支持 OpenRouter 等聚合平台。
 
 ```text
 mmclaw/

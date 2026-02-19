@@ -53,6 +53,18 @@ MMClaw allows you to interact with your agent through multiple channels:
 mmclaw config
 ```
 
+## 🧠 Providers
+
+MMClaw supports a wide range of LLM providers:
+
+- **OpenAI**: GPT-4o, o1, and more.
+- **OpenAI Codex**: Premium support via **OAuth device code authentication** (no manual API key management needed).
+- **Google Gemini**: Gemini 1.5 Pro/Flash, 2.0 Flash.
+- **DeepSeek**: DeepSeek-V3, DeepSeek-R1.
+- **Kimi (Moonshot AI)**: Native support for Kimi k2.5.
+- **OpenAI-Compatible**: Customizable Base URL for local or third-party engines (Ollama, LocalAI, etc.).
+- **Others**: OpenRouter and more.
+
 ## 📂 Project Structure
 
 ```text

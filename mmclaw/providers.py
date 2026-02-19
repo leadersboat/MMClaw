@@ -49,6 +49,7 @@ def prepare_image_content(image_bytes, text="What is in this image?"):
 
 class Engine(object):
     def __init__(self, config):
+        self.config = config # Store for refreshing
         self.engine_type = config["engine_type"] # Raises KeyError if missing
         engine_config = config["engines"][self.engine_type]
         
@@ -56,36 +57,179 @@ class Engine(object):
         self.base_url = engine_config["base_url"].rstrip('/')
         self.model = engine_config["model"]
         self.debug = config.get("debug", False)
+        self.account_id = engine_config.get("account_id")
+        
+        # Correct URL for Codex backend-api
+        if self.engine_type == "codex":
+            self.base_url = "https://chatgpt.com/backend-api/codex"
 
-    def ask(self, messages, tools=None):
-        if self.engine_type in ["openai", "google", "deepseek", "openrouter", "kimi", "openai_compatible"]:
-            payload = {
-                "model": self.model, 
-                "messages": messages, 
-                "stream": False
-            }
-            if tools:
-                payload["tools"] = tools
-                payload["tool_choice"] = "auto"
-
+    def _refresh_codex_token(self):
+        """Refreshes the OAuth token for Codex provider."""
+        try:
+            from .config import ConfigManager
+            engine_config = self.config["engines"]["codex"]
+            refresh_token = engine_config.get("refresh_token")
+            if not refresh_token:
+                return False
+                
+            print("[*] Codex: Refreshing Access Token...")
+            import urllib.parse
+            data = urllib.parse.urlencode({
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id": "app_EMoamEEZ73f0CkXaXp7hrann",
+            }).encode()
+            
             req = urllib.request.Request(
-                f"{self.base_url}/chat/completions",
-                data=json.dumps(payload).encode("utf-8"),
-                headers={
-                    "Authorization": f"Bearer {self.api_key}", 
-                    "Content-Type": "application/json"
-                },
+                "https://auth.openai.com/oauth/token", 
+                data=data, 
                 method="POST"
             )
+            req.add_header("Content-Type", "application/x-www-form-urlencoded")
             
+            with urllib.request.urlopen(req) as resp:
+                token_data = json.loads(resp.read().decode())
+                new_access_token = token_data["access_token"]
+                
+                # Update in memory and save to config
+                self.api_key = new_access_token
+                self.config["engines"]["codex"]["api_key"] = new_access_token
+                if "refresh_token" in token_data:
+                    self.config["engines"]["codex"]["refresh_token"] = token_data["refresh_token"]
+                
+                ConfigManager.save(self.config)
+                print("[✓] Codex: Token refreshed successfully.")
+                return True
+        except Exception as e:
+            print(f"[!] Codex Refresh Error: {e}")
+            return False
+
+    def ask(self, messages, tools=None):
+        if self.engine_type in ["openai", "codex", "google", "deepseek", "openrouter", "kimi", "openai_compatible"]:
+            if self.engine_type == "codex":
+                # Responses API (Codex)
+                system_msg = next((m["content"] for m in messages if m["role"] == "system"), "")
+                user_messages = [m for m in messages if m["role"] != "system"]
+                
+                input_items = []
+                for m in user_messages:
+                    input_items.append({
+                        "role": m["role"],
+                        "content": m["content"]
+                    })
+                
+                payload = {
+                    "model": self.model,
+                    "instructions": system_msg,
+                    "input": input_items,
+                    "tools": tools or [],
+                    "tool_choice": "auto",
+                    "parallel_tool_calls": True,
+                    "store": False,
+                    "stream": True
+                }
+                url = f"{self.base_url}/responses"
+            else:
+                # ChatCompletions API (standard)
+                payload = {
+                    "model": self.model, 
+                    "messages": messages,
+                    "stream": False
+                }
+                if tools:
+                    payload["tools"] = tools
+                    payload["tool_choice"] = "auto"
+                url = f"{self.base_url}/chat/completions"
+
+            def make_request(token, current_payload):
+                headers = {
+                    "Authorization": f"Bearer {token}", 
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0 (compatible; codex-cli/1.0)"
+                }
+                
+                if self.engine_type == "codex" and self.account_id:
+                    headers["ChatGPT-Account-ID"] = self.account_id
+                
+                return urllib.request.Request(
+                    url,
+                    data=json.dumps(current_payload).encode("utf-8"),
+                    headers=headers,
+                    method="POST"
+                )
+            
+            def parse_codex_response(res_data):
+                etype = res_data.get("type")
+                if etype == "response.output_text.delta":
+                    return res_data.get("delta", "")
+                
+                # Fallback for other content formats
+                msg_obj = res_data.get("message", {})
+                content = msg_obj.get("content", "")
+                if isinstance(content, list):
+                    return "".join([i.get("text", "") for i in content if isinstance(i, dict)])
+                return content if isinstance(content, str) else ""
+
             try:
+                if self.debug:
+                    print(f"\n[LLM Request ({self.engine_type})]\n{json.dumps(payload, indent=2)}\n")
+                
+                req = make_request(self.api_key, payload)
                 with urllib.request.urlopen(req, timeout=60) as response:
-                    res_data = json.loads(response.read().decode("utf-8"))
-                    msg = res_data["choices"][0]["message"]
+                    if self.engine_type == "codex":
+                        full_content = ""
+                        for line in response:
+                            line = line.decode("utf-8").strip()
+                            if not line.startswith("data: "): continue
+                            
+                            data_str = line[6:]
+                            if data_str == "[DONE]": break
+                            try:
+                                res_data = json.loads(data_str)
+                                if res_data.get("type") == "response.completed": break
+                                
+                                chunk_text = parse_codex_response(res_data)
+                                if chunk_text: full_content += chunk_text
+                            except: continue
+                        msg = {"role": "assistant", "content": full_content}
+                    else:
+                        res_data = json.loads(response.read().decode("utf-8"))
+                        msg = res_data["choices"][0]["message"]
+                        
                     if self.debug:
                         print(f"\n[LLM Response]\n{json.dumps(msg, indent=2)}\n")
                     return msg
             except Exception as e:
+                # Handle token expiry for codex
+                if self.engine_type == "codex" and isinstance(e, urllib.error.HTTPError):
+                    if e.code == 401:
+                        if self._refresh_codex_token():
+                            try:
+                                # Retry with new token
+                                req = make_request(self.api_key, payload)
+                                with urllib.request.urlopen(req, timeout=60) as response:
+                                    full_content = ""
+                                    for line in response:
+                                        line = line.decode("utf-8").strip()
+                                        if not line.startswith("data: "): continue
+                                        
+                                        data_str = line[6:]
+                                        if data_str == "[DONE]": break
+                                        try:
+                                            res_data = json.loads(data_str)
+                                            if res_data.get("type") == "response.completed": break
+                                            
+                                            chunk_text = parse_codex_response(res_data)
+                                            if chunk_text: full_content += chunk_text
+                                        except: continue
+                                    return {"role": "assistant", "content": full_content}
+                            except Exception as retry_e:
+                                print(f"[!] Retry Error: {retry_e}")
+                    
+                    # Handle 500 error for Codex
+                    elif e.code == 500:
+                        print("[!] Codex: 500 Error detected.")
+                
                 print(f"[!] Engine Error: {e}")
                 error_msg = f"Engine Error: {e}"
                 if isinstance(e, urllib.error.HTTPError):

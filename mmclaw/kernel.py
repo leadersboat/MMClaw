@@ -111,7 +111,8 @@ class MMClaw(object):
                     
                     if self.debug:
                         print(f"\n    [Tool Output: {name}]\n    {result}\n")
-                    self.memory.add("system", f"Tool Output ({name}):\n{result}")
+                    # self.memory.add("system", f"Tool Output ({name}):\n{result}")
+                    self.memory.add("user", f"Tool Output ({name}):\n{result}")
 
             self.task_queue.task_done()
 

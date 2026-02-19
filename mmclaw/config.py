@@ -82,6 +82,11 @@ class ConfigManager(object):
                 "api_key": "sk-your-key-here",
                 "base_url": "https://api.openai.com/v1"
             },
+            "codex": {
+                "model": "gpt-4o",
+                "api_key": "sk-your-key-here",
+                "base_url": "https://api.openai.com/v1"
+            },
             "deepseek": {
                 "model": "deepseek-chat",
                 "api_key": "sk-your-key-here",
