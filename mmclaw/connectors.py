@@ -20,6 +20,9 @@ class TerminalConnector(object):
                 if text: callback(text) 
             except KeyboardInterrupt: break
 
+    def start_typing(self): pass
+    def stop_typing(self): pass
+
     def send(self, message):
         print(f"\r🐈 MMClaw: {message}\n👤 You: ", end="", flush=True)
 
@@ -141,9 +144,12 @@ class FeishuConnector(object):
         )
         self.ws_client.start()
 
+    def start_typing(self): pass
+    def stop_typing(self): pass
+
     def send(self, message):
         from lark_oapi.api.im.v1 import ReplyMessageRequest, ReplyMessageRequestBody
-        if not self.last_message_id: 
+        if not self.last_message_id:
             return
         
         reply_body = json.dumps({"text": message})
@@ -211,22 +217,39 @@ class TelegramConnector(object):
     def __init__(self, token, telegram_authorized_user_id):
         self.bot = telebot.TeleBot(token)
         self.telegram_authorized_user_id = int(telegram_authorized_user_id)
+        self.chat_id = None
+        self._typing = False
+
+    def start_typing(self):
+        self._typing = True
+        def _type_loop():
+            while self._typing:
+                try:
+                    self.bot.send_chat_action(self.chat_id, 'typing')
+                except Exception:
+                    pass
+                threading.Event().wait(1)
+        threading.Thread(target=_type_loop, daemon=True).start()
+
+    def stop_typing(self):
+        self._typing = False
 
     def listen(self, callback):
         print(f"\n--- MMClaw Kernel Active (Telegram Mode) ---")
         print(f"[*] Listening for messages from User ID: {self.telegram_authorized_user_id}")
-        
-        @self.bot.message_handler(func=lambda message: message.from_user.id == self.telegram_authorized_user_id, 
+
+        @self.bot.message_handler(func=lambda message: message.from_user.id == self.telegram_authorized_user_id,
                                   content_types=['text', 'photo', 'document'])
         def handle_message(message):
+            self.chat_id = message.chat.id
             text = message.text or message.caption or ""
-            
+
             if message.content_type == 'photo':
                 try:
                     file_id = message.photo[-1].file_id
                     file_info = self.bot.get_file(file_id)
                     downloaded_file = self.bot.download_file(file_info.file_path)
-                    
+
                     content = prepare_image_content(downloaded_file, text if text else "What is in this image?")
                     print(f"📩 Telegram: [Photo] {text} (Compressed)")
                     callback(content)
@@ -237,7 +260,7 @@ class TelegramConnector(object):
                 if text:
                     print(f"📩 Telegram: {text}")
                     callback(text)
-            
+
         @self.bot.message_handler(func=lambda message: message.from_user.id != self.telegram_authorized_user_id,
                                   content_types=['text', 'photo', 'audio', 'video', 'document', 'sticker', 'voice'])
         def unauthorized(message):
@@ -274,6 +297,7 @@ class WhatsAppConnector(object):
         self.bridge_path = os.path.join(os.path.dirname(__file__), "bridge.js")
         self.is_windows = os.name == 'nt'
         self._deps_checked = False
+        self._typing = False
 
     def _ensure_node(self):
         if not shutil.which("node"):
@@ -432,6 +456,28 @@ class WhatsAppConnector(object):
 
         threading.Thread(target=output_reader, daemon=True).start()
         self.process.wait()
+
+    def _send_presence(self, action):
+        recipient = self.active_recipient or self.authorized_id
+        if not self.process or not recipient: return
+        try:
+            payload = {"to": recipient, "action": action}
+            self.process.stdin.write(f"TYPING:{json.dumps(payload)}\n")
+            self.process.stdin.flush()
+        except Exception:
+            pass
+
+    def start_typing(self):
+        self._typing = True
+        def _type_loop():
+            while self._typing:
+                self._send_presence("composing")
+                threading.Event().wait(1)
+        threading.Thread(target=_type_loop, daemon=True).start()
+
+    def stop_typing(self):
+        self._typing = False
+        self._send_presence("paused")
 
     def send(self, message):
         if not self.process or not (self.active_recipient or self.authorized_id): return

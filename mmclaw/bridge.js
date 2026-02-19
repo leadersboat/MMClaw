@@ -159,7 +159,10 @@ process.stdin.on("data", async (data) => {
     if (!sock) return;
     try {
         const line = data.toString().trim();
-        if (line.startsWith("SEND:")) {
+        if (line.startsWith("TYPING:")) {
+            const payload = JSON.parse(line.substring(7));
+            await sock.sendPresenceUpdate(payload.action, payload.to);
+        } else if (line.startsWith("SEND:")) {
             const payload = JSON.parse(line.substring(5));
             await sock.sendMessage(payload.to, { text: payload.text });
         } else if (line.startsWith("SEND_FILE:")) {

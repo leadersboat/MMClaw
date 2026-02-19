@@ -54,6 +54,7 @@ class MMClaw(object):
             
             self.memory.add("user", user_text)
             
+            self.connector.start_typing()
             while True:
                 response_msg = self.engine.ask(self.memory.get_all())
                 raw_text = response_msg.get("content", "")
@@ -114,6 +115,7 @@ class MMClaw(object):
                     # self.memory.add("system", f"Tool Output ({name}):\n{result}")
                     self.memory.add("user", f"Tool Output ({name}):\n{result}")
 
+            self.connector.stop_typing()
             self.task_queue.task_done()
 
     def handle(self, text):
